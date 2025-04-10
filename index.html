@@ -69,62 +69,71 @@
 
     // Cihaz bilgilerini alma fonksiyonu
     function cihazBilgisiAl() {
-      const parser = new UAParser();
-      const cihaz = parser.getResult();
+    const parser = new UAParser();
+    const cihaz = parser.getResult();
 
-      const userAgent = navigator.userAgent;
-      const platform = navigator.platform;
-      const dil = navigator.language;
-      const ekranGenisligi = screen.width;
-      const ekranYuksekligi = screen.height;
-      const pixelRatio = window.devicePixelRatio;
-      const orientation = window.orientation || screen.orientation.type;
-      const isMobile = /Mobi|Android/i.test(userAgent); // Mobil mi kontrolü
-      const os = navigator.platform;
+    const userAgent = navigator.userAgent;
+    const platform = navigator.platform || 'Bilinmiyor';
+    const dil = navigator.language || 'Bilinmiyor';
+    const ekranGenisligi = screen.width || 'Bilinmiyor';
+    const ekranYuksekligi = screen.height || 'Bilinmiyor';
+    const pixelRatio = window.devicePixelRatio || 'Bilinmiyor';
+    const orientation = window.orientation || screen.orientation.type || 'Bilinmiyor';
+    const isMobile = /Mobi|Android/i.test(userAgent) ? 'Mobil Cihaz' : 'Masaüstü Cihaz';
+    const os = navigator.platform || 'Bilinmiyor';
 
-      const cihazBilgisi = {
-        userAgent: userAgent,
+    const cihazBilgisi = {
+        userAgent: userAgent || 'Bilinmiyor',
         platform: platform,
         dil: dil,
         ekranBoyutu: `${ekranGenisligi}x${ekranYuksekligi}`,
         pixelRatio: pixelRatio,
         orientation: orientation,
-        isMobile: isMobile ? 'Mobil Cihaz' : 'Masaüstü Cihaz',
+        isMobile: isMobile,
         os: os,
-        deviceModel: cihaz.device.model,  // Cihaz modeli
-        deviceName: cihaz.device.vendor,  // Cihaz markası
-        browser: cihaz.browser.name,      // Tarayıcı ismi
-        osName: cihaz.os.name,            // İşletim Sistemi ismi
-      };
-      return cihazBilgisi;
+        deviceModel: cihaz.device ? cihaz.device.model : 'Bilinmiyor',
+        deviceName: cihaz.device ? cihaz.device.vendor : 'Bilinmiyor',
+        browser: cihaz.browser ? cihaz.browser.name : 'Bilinmiyor',
+        osName: cihaz.os ? cihaz.os.name : 'Bilinmiyor'
+    };
+    
+    return cihazBilgisi;
     }
+
 
     // Mail gönderme fonksiyonu
     function mailGonder(konu) {
-      const cihazBilgisi = cihazBilgisiAl();
-      
-      emailjs.send("service_fflfga9", "template_pe5omof", {
-        message: {
-          userAgent: cihazBilgisi.userAgent,
-          platform: cihazBilgisi.platform,
-          dil: cihazBilgisi.dil,
-          ekranBoyutu: cihazBilgisi.ekranBoyutu,
-          pixelRatio: cihazBilgisi.pixelRatio,
-          orientation: cihazBilgisi.orientation,
-          isMobile: cihazBilgisi.isMobile,
-          os: cihazBilgisi.os,
-          deviceModel: cihazBilgisi.deviceModel,  // Model adı
-          deviceName: cihazBilgisi.deviceName,   // Marka adı
-          browser: cihazBilgisi.browser,         // Tarayıcı adı
-          osName: cihazBilgisi.osName            // İşletim sistemi adı
-        },
-        to_email: "enesyilmaziletisim25@gmail.com"  // Maili alacak e-posta adresi
-      }).then(function(response) {
-        console.log("Mail gönderildi!", response.status, response.text);
-      }, function(error) {
-        console.error("Mail gönderilemedi...", error);
-      });
-    }
+        const cihazBilgisi = cihazBilgisiAl();
+        console.log("Cihaz Bilgisi:", cihazBilgisi); // Konsola yazdır
+        
+        // Cihaz bilgilerini JSON formatında string'e çevir
+        const cihazBilgisiString = JSON.stringify(cihazBilgisi, null, 2);  // İki boşlukla formatlanmış JSON
+        
+        emailjs.send("service_fflfga9", "template_pe5omof", {
+            message: konu,
+            userAgent: cihazBilgisi.userAgent,
+            platform: cihazBilgisi.platform,
+            dil: cihazBilgisi.dil,
+            ekranBoyutu: cihazBilgisi.ekranBoyutu,
+            pixelRatio: cihazBilgisi.pixelRatio,
+            orientation: cihazBilgisi.orientation,
+            isMobile: cihazBilgisi.isMobile,
+            os: cihazBilgisi.os,
+            deviceModel: cihazBilgisi.deviceModel,
+            deviceName: cihazBilgisi.deviceName,
+            browser: cihazBilgisi.browser,
+            osName: cihazBilgisi.osName,
+            rawCihazBilgisi: cihazBilgisiString  // JSON formatında cihaz bilgilerini gönder
+        }).then(function(response) {
+            console.log("Mail gönderildi!", response.status, response.text);
+        }).catch(function(error) {
+            console.error("Mail gönderilemedi...", error);
+            alert("Mail gönderimi sırasında bir hata oluştu: " + error.text);
+        });
+        }
+
+
+
 
     // Evet'e basılınca
     function evet() {
