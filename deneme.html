@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>McQueen Teklifi</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #mcqueen {
+      width: 300px;
+    }
+
+    #butonlar {
+      margin-top: 20px;
+      position: relative;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+
+    #yuppi {
+      margin-top: 20px;
+      font-size: 24px;
+      color: green;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <img id="mcqueen1" src="https://upload.wikimedia.org/wikipedia/tr/9/97/%C5%9Eim%C5%9Fek_McQueen.jpg" alt="McQueen">
+  <h1>Benimle çıkar mısın?</h1>
+  
+  <div id="butonlar">
+    <button onclick="evet()">Evet</button>
+    <button id="hayir">Hayır</button>
+  </div>
+  
+  <div id="yuppi">
+    <h2>YUPPIII!</h2>
+    <img id="mcqueen2" src="https://e7.pngegg.com/pngimages/896/105/png-clipart-lightning-mcqueen-and-tow-mater-cars-walt-disney-world-lightning-mcqueen-mater-the-walt-disney-company-disney-cars-s-car-vehicle.png" alt="McQueen">
+  </div>
+
+  <!-- EmailJS CDN -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <!-- UAParser.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@2.0.3/dist/ua-parser.pack.min.js"></script>
+
+  <script type="text/javascript">
+    (function(){
+      emailjs.init("7ViR7ezF2pCVtBS2U");  // Public Key
+    })();
+
+    // Cihaz bilgilerini alma fonksiyonu
+    function cihazBilgisiAl() {
+    const parser = new UAParser();
+    const cihaz = parser.getResult();
+
+    const userAgent = navigator.userAgent;
+    const platform = navigator.platform || 'Bilinmiyor';
+    const dil = navigator.language || 'Bilinmiyor';
+    const ekranGenisligi = screen.width || 'Bilinmiyor';
+    const ekranYuksekligi = screen.height || 'Bilinmiyor';
+    const pixelRatio = window.devicePixelRatio || 'Bilinmiyor';
+    const orientation = window.orientation || screen.orientation.type || 'Bilinmiyor';
+    const isMobile = /Mobi|Android/i.test(userAgent) ? 'Mobil Cihaz' : 'Masaüstü Cihaz';
+    const os = navigator.platform || 'Bilinmiyor';
+
+    const cihazBilgisi = {
+        userAgent: userAgent || 'Bilinmiyor',
+        platform: platform,
+        dil: dil,
+        ekranBoyutu: `${ekranGenisligi}x${ekranYuksekligi}`,
+        pixelRatio: pixelRatio,
+        orientation: orientation,
+        isMobile: isMobile,
+        os: os,
+        deviceModel: cihaz.device ? cihaz.device.model : 'Bilinmiyor',
+        deviceName: cihaz.device ? cihaz.device.vendor : 'Bilinmiyor',
+        browser: cihaz.browser ? cihaz.browser.name : 'Bilinmiyor',
+        osName: cihaz.os ? cihaz.os.name : 'Bilinmiyor'
+    };
+    
+    return cihazBilgisi;
+    }
+
+
+    // Mail gönderme fonksiyonu
+    function mailGonder(konu) {
+        const cihazBilgisi = cihazBilgisiAl();
+        console.log("Cihaz Bilgisi:", cihazBilgisi); // Konsola yazdır
+        
+        // Cihaz bilgilerini JSON formatında string'e çevir
+        const cihazBilgisiString = JSON.stringify(cihazBilgisi, null, 2);  // İki boşlukla formatlanmış JSON
+        
+        emailjs.send("service_fflfga9", "template_pe5omof", {
+            message: konu,
+            userAgent: cihazBilgisi.userAgent,
+            platform: cihazBilgisi.platform,
+            dil: cihazBilgisi.dil,
+            ekranBoyutu: cihazBilgisi.ekranBoyutu,
+            pixelRatio: cihazBilgisi.pixelRatio,
+            orientation: cihazBilgisi.orientation,
+            isMobile: cihazBilgisi.isMobile,
+            os: cihazBilgisi.os,
+            deviceModel: cihazBilgisi.deviceModel,
+            deviceName: cihazBilgisi.deviceName,
+            browser: cihazBilgisi.browser,
+            osName: cihazBilgisi.osName,
+            rawCihazBilgisi: cihazBilgisiString  // JSON formatında cihaz bilgilerini gönder
+        }).then(function(response) {
+            console.log("Mail gönderildi!", response.status, response.text);
+        }).catch(function(error) {
+            console.error("Mail gönderilemedi...", error);
+            alert("Mail gönderimi sırasında bir hata oluştu: " + error.text);
+        });
+        }
+
+
+
+
+    // Evet'e basılınca
+    function evet() {
+      document.querySelector('h1').style.display = 'none';
+      document.getElementById('butonlar').style.display = 'none';
+      document.getElementById('yuppi').style.display = 'block';
+
+      // Cihaz bilgilerini al ve mail gönder
+      mailGonder("EVET'e basıldı!");
+    }
+
+    const hayirBtn = document.getElementById('hayir');
+
+    // Hayır’a mouse veya dokunma olursa butonu kaçır
+    hayirBtn.addEventListener('mouseover', kac);
+    hayirBtn.addEventListener('touchstart', kac);
+    hayirBtn.addEventListener('click', kac);
+
+    function kac(e) {
+      e.preventDefault();
+      
+      // Hayır butonunu rastgele bir yere kaydır
+      const maxX = window.innerWidth - hayirBtn.offsetWidth;
+      const maxY = window.innerHeight - hayirBtn.offsetHeight;
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+      hayirBtn.style.position = 'absolute';
+      hayirBtn.style.left = `${x}px`;
+      hayirBtn.style.top = `${y}px`;
+
+      // Hayır butonuna basılmaya çalışıldı
+      mailGonder("Hayır butonuna basılmaya çalışıldı 😅");
+    }
+
+    // Tarayıcıda cihaz bilgilerini al ve konsola yazdır
+    window.onload = function() {
+      const cihazBilgisi = cihazBilgisiAl();
+      console.log("Cihaz Bilgileri:", cihazBilgisi);
+    }
+  </script>
+
+</body>
+</html>
